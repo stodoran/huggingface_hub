@@ -1009,7 +1009,13 @@ def _hf_hub_download_to_cache_dir(
     if os.name == "nt" and len(os.path.abspath(blob_path)) > 255:
         blob_path = "\\\\?\\" + os.path.abspath(blob_path)
 
-    Path(lock_path).parent.mkdir(parents=True, exist_ok=True)
+    try:
+        Path(lock_path).parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        # This will fail if the cache is not writable, but we still want
+        # to be able to use the cache even if we can't write to it.
+        pass
+
     with WeakFileLock(lock_path):
         _download_to_tmp_and_move(
             incomplete_path=Path(blob_path + ".incomplete"),
