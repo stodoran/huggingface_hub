@@ -1011,24 +1011,23 @@ def _hf_hub_download_to_cache_dir(
 
     try:
         Path(lock_path).parent.mkdir(parents=True, exist_ok=True)
-    except OSError:
+        with WeakFileLock(lock_path):
+            _download_to_tmp_and_move(
+                incomplete_path=Path(blob_path + ".incomplete"),
+                destination_path=Path(blob_path),
+                url_to_download=url_to_download,
+                proxies=proxies,
+                headers=headers,
+                expected_size=expected_size,
+                filename=filename,
+                force_download=force_download,
+            )
+            if not os.path.exists(pointer_path):
+                _create_symlink(blob_path, pointer_path, new_blob=True)
+    except PermissionError:
         # This will fail if the cache is not writable, but we still want
         # to be able to use the cache even if we can't write to it.
         pass
-
-    with WeakFileLock(lock_path):
-        _download_to_tmp_and_move(
-            incomplete_path=Path(blob_path + ".incomplete"),
-            destination_path=Path(blob_path),
-            url_to_download=url_to_download,
-            proxies=proxies,
-            headers=headers,
-            expected_size=expected_size,
-            filename=filename,
-            force_download=force_download,
-        )
-        if not os.path.exists(pointer_path):
-            _create_symlink(blob_path, pointer_path, new_blob=True)
 
     return pointer_path
 
