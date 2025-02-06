@@ -974,8 +974,13 @@ def _hf_hub_download_to_cache_dir(
     blob_path = os.path.join(storage_folder, "blobs", etag)
     pointer_path = _get_pointer_path(storage_folder, commit_hash, relative_filename)
 
-    os.makedirs(os.path.dirname(blob_path), exist_ok=True)
-    os.makedirs(os.path.dirname(pointer_path), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(blob_path), exist_ok=True)
+        os.makedirs(os.path.dirname(pointer_path), exist_ok=True)
+    except OSError:
+        # This will fail if the cache is not writable, but we still want
+        # to be able to use the cache even if we can't write to it.
+        pass
 
     # if passed revision is not identical to commit_hash
     # then revision has to be a branch name or tag name.
