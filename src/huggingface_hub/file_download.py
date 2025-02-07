@@ -980,6 +980,7 @@ def _hf_hub_download_to_cache_dir(
     except OSError:
         # This will fail if the cache is not writable, but we still want
         # to be able to use the cache even if we can't write to it.
+        logger.warning(f"Unable to write to cache directory {cache_dir}. Continuing...")
         pass
 
     # if passed revision is not identical to commit_hash
@@ -1027,6 +1028,7 @@ def _hf_hub_download_to_cache_dir(
     except PermissionError:
         # This will fail if the cache is not writable, but we still want
         # to be able to use the cache even if we can't write to it.
+        logger.warning(f"Unable to write to cache directory {cache_dir}. Continuing...")
         pass
 
     return pointer_path
